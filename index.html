@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bellota&display=swap" rel="stylesheet">
+    <title>Document</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            box-sizing: border-box;
+            font-family: 'Bellota', cursive;
+        }
+
+        body {
+            height: 100vh;
+            background: url(shary-podarki-fon-belyi.jpg) 100% 100% no-repeat;
+            background-size: cover;
+        }
+        .container {
+            background-color: white;
+            width: 800px;
+            height: 500px;
+            border-radius: 20px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 100px;
+        }
+        h1 , p {
+            text-align: center;
+            margin: 30px;
+        }
+        h1 {
+            font-size: 37px;
+        }
+        p {
+            font-size: 30px;
+            margin-top: 100px;
+            line-height: 200%;
+        }
+        #hello, #questions {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            display: none;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        #questionsContainer, #helloContainer {
+            position: relative;
+            width: 500px;
+            height: 300px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 200px;
+            background-color: white;
+            border-radius: 20px;
+            text-align: center;
+            padding: 30px;
+        }
+        [type="button"] {
+            width: 200px;
+            height: 50px;
+            border-radius: 20px;
+            background-color: turquoise;
+            border-color: transparent;
+            position: absolute;
+            bottom: 35px;
+            right: 35px;
+        }
+        h6 {
+            font-size: 50px;
+            margin-top: 30px;
+        }
+        #questionsContainer {
+            text-align: left;
+            padding: 30px;        
+        }
+        label , [type="text"] {
+            font-size: 20px;
+            line-height: 400%;
+        }
+        [type="text"] {
+            border-radius: 20px;
+            border-color: turquoise;
+            height: 35px;
+            padding-left: 10px;
+        }
+        #clientBirth {
+            width: 150px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Сколько ждать до Дня Рождения.</h1>
+        <p>До твоего Дня Рождения осталось: <br><b></b></p>
+    </div>
+    
+    <div id="hello">
+        <div id="helloContainer">
+            <h6></h6>
+            <input type="button" value="Привет!" onclick="closeHello()">
+
+        </div>
+    </div>
+    <div id="questions">
+        <div id="questionsContainer">
+            <label for="clientName">Как тебя зовут?</label>
+            <input type="text" id="clientName"><br>
+            <label for="clientBirth">Когда у тебя День Рождения?</label>
+            <input type="text" id="clientBirth" placeholder="ДД-ММ"><br>
+            <input type="button" value="OK" onclick="closeQuest()">
+        </div>
+    </div>
+
+    <script>
+        let divHello = document.getElementById('hello');
+        let helloText = divHello.querySelector('h6');
+        let divQuest = document.getElementById('questions');
+        let bCount = document.querySelector('b'); 
+
+        var name = "";
+        var birth = "";
+
+        if (localStorage.getItem('userBirthDay')) {
+            divHello.style.display = "block";
+            helloText.innerText =  "Привет, "+JSON.parse(localStorage.getItem('userBirthDay')).nameUser+"!!!";
+        }
+        else {
+            divQuest.style.display = "block";
+        }
+        
+        function closeHello() {
+            name = JSON.parse(localStorage.getItem('userBirthDay')).nameUser;
+            birth = JSON.parse(localStorage.getItem('userBirthDay')).birthday;
+            console.log(name);
+            console.log(birth);
+            divHello.style.display = "none";
+            count();
+        }
+
+        function closeQuest() {
+            let inputName = document.getElementById('clientName');
+            name = inputName.value;
+            let inputBirth = document.getElementById('clientBirth');
+            birth = inputBirth.value;
+            if (name && birth) {
+                divQuest.style.display = "none";
+                localStorage.setItem("userBirthDay", JSON.stringify({
+                "nameUser":name,
+                "birthday": birth
+            }));
+            count();
+            }
+            
+        }
+        
+        let monthStr = "";
+        let dayStr = "";
+        let hourStr = "";
+        let minuteStr = "";
+        let secundStr = "";
+
+        function count() {
+
+            if (!localStorage.getItem("userBirthDay")) {
+                divQuest.style.display = "block";
+            }
+
+            let timerID = setTimeout(function count() {
+                let now = new Date();
+                let birhDate = new Date(now.getFullYear(), birth.substr(3)-1, birth.substr(0,2));
+
+                if (now.getMonth()==birhDate.getMonth() && now.getDate()==birhDate.getDate()) {
+                    let p = document.querySelector('p');
+                    p.innerText = "C Днём Рождения!";
+                    timerID = setTimeout(count, 1000);
+                    return;
+                }
+
+                if (now.getTime()>birhDate.getTime()) {
+                    birhDate.setFullYear(now.getFullYear()+1);
+                }
+
+                let middleDate = new Date(birhDate.getFullYear(), birhDate.getMonth()-1,birhDate.getDate());
+
+                for (var monthCount=0; now.getTime()<middleDate.getTime(); monthCount++) {
+                    now.setMonth(now.getMonth()+1);
+                };
+
+                let restTime = (birhDate.getTime() - now.getTime())/1000;
+                let dayCount =  Math.floor((restTime)/60/60/24);
+                restTime = restTime-dayCount*24*60*60;
+                let hourCount = Math.floor((restTime)/60/60);
+                restTime = restTime - hourCount*60*60;
+                let minuteCount = Math.floor((restTime)/60);
+                let secundCount = Math.floor(restTime - minuteCount*60);
+
+                if (monthCount==1) {monthStr = monthCount+" месяц, ";}
+                else if(monthCount>=2 && monthCount<=4) {monthStr = monthCount+" месяца, ";}
+                else {monthStr = monthCount+" месяцев, ";}
+
+                if (dayCount==1 || dayCount==21) {dayStr = dayCount+" день, ";}
+                else if((dayCount>=2 && dayCount<=4) || (dayCount>=22 && dayCount<=24)) {dayStr = dayCount+" дня, ";}
+                else {dayStr = dayCount+" дней, ";}
+
+                if (hourCount==1 || hourCount==21) {hourStr = hourCount+" час, ";}
+                else if((hourCount>=2 && hourCount<=4) || hourCount==22 || hourCount==23) {hourStr = hourCount+" часа, ";}
+                else {hourStr = hourCount+" часов, ";}
+
+                if (minuteCount%10==1 && minuteCount!=11) {minuteStr = minuteCount+" минута, ";}
+                else if((minuteCount%10==2 || minuteCount%10==3 || minuteCount%10==4) && minuteCount!=12 && minuteCount!=13 && minuteCount!=14) {minuteStr = minuteCount+" минуты, ";}
+                else {minuteStr = minuteCount+" минут, ";}
+
+                if (secundCount%10==1 && secundCount!=11) {secundStr = secundCount+" секунда.";}
+                else if((secundCount%10==2 || secundCount%10==3 || secundCount%10==4) && secundCount!=12 && secundCount!=13 && secundCount!=14) {secundStr = secundCount+" секунды.";}
+                else {secundStr = secundCount+" секунд.";}
+
+                bCount.innerText = monthStr + dayStr + hourStr + minuteStr + secundStr;
+
+                timerID = setTimeout(count, 1000);
+
+            },0)
+            
+        }
+    </script>
+</body>
+</html>
